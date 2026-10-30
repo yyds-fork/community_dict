@@ -14,11 +14,10 @@ python3.8.5
 #### 采集网站
 
 - 贝壳[https://www.ke.com/]
-- 房产超市[http://www.fccs.com/]
 - 链家[https://www.lianjia.com/city/]
-- 搜楼啦[http://www.souloula.com/]
-- 搜房[https://zz.sofang.com]
-- 吉屋网[http://www.jiwu.com/] (未采集)
+- 房天下[https://www.fang.com/]
+- 房产超市[http://www.fccs.com/]
+- 吉屋网[http://www.jiwu.com/]
 - 58同城[https://www.anjuke.com/] (未开始)
 - 安居客[https://www.anjuke.com/] (未开始)
 

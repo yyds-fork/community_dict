@@ -40,6 +40,8 @@ class 房产超市:
         city_dict = dict()
         for city_etree in city_list_etree.xpath(self.citys_xpath):
             city_name, city_url = city_etree.xpath('text()')[0], city_etree.xpath('@href')[0]
+            if city_url.startswith('//'):
+                city_url = 'http:' + city_url
             city_dict[city_name] = {'city_name': city_name, 'city_url': city_url}
         operation_file.write_json_file(self.citys_file_name, city_dict)
 
@@ -51,6 +53,8 @@ class 房产超市:
         二层循环, 循环页码, 从页码2开始采集(页码1已经采集过了), 同样根据是否有小区列表来判定此区域是否采集完成
         将数据保存到 JSON 文件中
         '''
+        if city_url.startswith('//'):
+            city_url = 'http:' + city_url
         plots_url = self.plots_url.format(city_url=city_url, area_num="{area_num}", page="{page}")
         area_num, plots_dict = 1, dict()
         while True:
@@ -146,5 +150,6 @@ class 房产超市:
         for city_key, city_value in operation_file.read_json_file(self.citys_file_name).items():
             if os.path.exists(self.plots_file_name.format(city_name=city_value['city_name'])) is False:
                 self.get_plots(city_value['city_name'], city_value['city_url'])
-        for file_name in os.listdir(self.plots_dir_name):
-            self.get_plots_detail(self.plots_dir_name + file_name)
+        if os.path.exists(self.plots_dir_name):
+            for file_name in os.listdir(self.plots_dir_name):
+                self.get_plots_detail(self.plots_dir_name + file_name)

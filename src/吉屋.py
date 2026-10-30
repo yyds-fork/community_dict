@@ -27,10 +27,15 @@ class 吉屋:
         '''
         common.print_and_sleep('吉屋网：采集城市列表', time_interval=self.time_interval)
         etree = gather.get_html_to_etree(self.citys_url, headers=self.headers)
-        citys_etree = etree.xpath('//div[@class="fivindexcont citymar"]//a')
+        citys_etree = etree.xpath('//div[@class="fivindexcont citymar"]//a') or etree.xpath('//div[contains(@class, "city-all")]//a')
         citys_dict = dict()
         for city_etree in citys_etree:
-            city_name, city_url = city_etree.xpath('text()')[0], self.plots_url.format(city_url=city_etree.xpath('@href')[0], page="{page}")
+            name_list = city_etree.xpath('text()')
+            href_list = city_etree.xpath('@href')
+            if not name_list or not href_list:
+                continue
+            city_name = name_list[0].strip()
+            city_url = self.plots_url.format(city_url=href_list[0].rstrip('/'), page="{page}")
             citys_dict[city_name] = {'city_name': city_name, 'city_url': city_url}
         operation_file.write_json_file(self.citys_file_name, citys_dict)
 
@@ -52,10 +57,16 @@ class 吉屋:
             common.print_and_sleep('吉屋网：采集{city_name}小区第{page}页: {url}'.format(city_name=city_name, page=page, url=temp_url), time_interval=self.time_interval)
             etree = gather.get_html_to_etree(temp_url, headers=self.headers)
             if page == 1:
-                max_page = math.ceil(int(etree.xpath('//div[@class="txt"]/span/text()')[0]) / 20)
+                span_text = etree.xpath('//div[@class="txt"]/span/text()')
+                if span_text and span_text[0].isdigit():
+                    max_page = math.ceil(int(span_text[0]) / 20)
+                else:
+                    max_page = 1
             for plot_etree in etree.xpath('//div[@class="tit"]/a'):
-                plot_name, plot_url = plot_etree.xpath('text()')[0], plot_etree.xpath('@href')[0]
-                plots_dict[plot_name] = {'plot_name': plot_name, 'plot_url': plot_url}
+                names = plot_etree.xpath('text()')
+                hrefs = plot_etree.xpath('@href')
+                if names and hrefs:
+                    plots_dict[names[0]] = {'plot_name': names[0], 'plot_url': hrefs[0]}
             page += 1
         print('{city_name}小区采集完成，保存数据'.format(city_name=city_name))
         operation_file.write_json_file(self.plots_file_name.format(city_name=city_name), plots_dict)
